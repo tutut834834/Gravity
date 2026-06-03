@@ -3,68 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVITY//CORE - Quantum Singularity Engine v2.0</title>
+    <title>GRAVITY//CORE v2 - Space Exploration Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
         
         body {
             font-family: 'Share Tech Mono', monospace;
-            background-color: #000003;
+            background-color: #000002;
             overflow: hidden;
         }
         .orbitron { font-family: 'Orbitron', sans-serif; }
         .cyber-panel {
-            background: rgba(2, 2, 8, 0.95);
-            backdrop-filter: blur(25px);
-            border: 2px solid rgba(0, 240, 255, 0.25);
-            box-shadow: 0 0 35px rgba(0, 240, 255, 0.15);
+            background: rgba(2, 2, 10, 0.93);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
         }
-        .cyber-panel-success {
-            border: 2px solid rgba(34, 197, 94, 0.6);
-            box-shadow: 0 0 35px rgba(34, 197, 94, 0.3);
-        }
-        .cyber-panel-error-high {
-            border: 2px solid rgba(239, 68, 68, 0.6);
-            box-shadow: 0 0 35px rgba(239, 68, 68, 0.3);
-        }
-        .cyber-panel-error-low {
-            border: 2px solid rgba(234, 179, 8, 0.6);
-            box-shadow: 0 0 35px rgba(234, 179, 8, 0.3);
-        }
+        .cyber-panel-success { border: 2px solid rgba(34, 197, 94, 0.5); box-shadow: 0 0 30px rgba(34, 197, 94, 0.2); }
+        .cyber-panel-error-high { border: 2px solid rgba(239, 68, 68, 0.5); box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); }
+        .cyber-panel-error-low { border: 2px solid rgba(234, 179, 8, 0.5); box-shadow: 0 0 30px rgba(234, 179, 8, 0.2); }
+        
         input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
+            -webkit-appearance: none; appearance: none;
             background: rgba(0, 240, 255, 0.08);
-            border: 2px solid rgba(0, 240, 255, 0.3);
-            border-radius: 4px;
-            height: 16px;
+            border: 2px solid rgba(0, 240, 255, 0.25);
+            border-radius: 4px; height: 16px;
         }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 28px;
-            height: 38px;
-            border-radius: 2px;
-            background: #00f0ff;
-            border: 2px solid #fff;
-            cursor: pointer;
-            box-shadow: 0 0 25px #00f0ff;
-            transition: background-color 0.2s;
+            -webkit-appearance: none; appearance: none;
+            width: 26px; height: 36px; border-radius: 2px;
+            background: #00f0ff; border: 2px solid #fff; cursor: pointer;
+            box-shadow: 0 0 20px #00f0ff;
         }
         .calibrated-slider::-webkit-slider-thumb {
-            background: #22c55e !important;
-            box-shadow: 0 0 35px #22c55e !important;
+            background: #22c55e !important; box-shadow: 0 0 25px #22c55e !important;
         }
         body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(15, 15, 15, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.04));
-            z-index: 999;
-            background-size: 100% 6px, 6px 100%;
-            pointer-events: none;
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(15, 15, 15, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            z-index: 999; background-size: 100% 4px; pointer-events: none;
         }
     </style>
 </head>
@@ -72,868 +50,625 @@
 
     <canvas id="worldCanvas" class="absolute inset-0 w-full h-full z-0"></canvas>
 
+    <div id="zoomOverlay" class="absolute inset-0 z-40 bg-black/40 flex items-center justify-center pointer-events-none transition-opacity duration-500 opacity-0">
+        <div class="cyber-panel px-8 py-4 rounded-xl text-center border-purple-500/40 shadow-[0_0_40px_rgba(168,85,247,0.2)]">
+            <span class="text-xxs uppercase tracking-widest text-purple-400 animate-pulse block">Hyper-Antrieb aktiv</span>
+            <h2 id="zoomPlanetTitle" class="orbitron text-4xl font-black text-white tracking-widest mt-1">STARTE ANFLUG</h2>
+        </div>
+    </div>
+
     <div id="gameUI" class="absolute inset-0 flex flex-col justify-between p-6 z-10 pointer-events-none">
         
         <header class="flex justify-between items-start w-full pointer-events-auto">
-            <div class="cyber-panel p-5 rounded-xl flex flex-col gap-2 min-w-[320px]">
-                <h1 class="orbitron text-3xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600">
+            <div class="cyber-panel p-4 rounded-xl flex flex-col gap-1 min-w-[280px]">
+                <h1 class="orbitron text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500">
                     GRAVITY//CORE v2
                 </h1>
-                <div class="grid grid-cols-2 text-xs font-mono text-cyan-400 border-t border-white/10 pt-2">
-                    <span id="progressionCounter">SEKTOR MAP: 0 / 0</span>
+                <div class="grid grid-cols-2 text-xs font-mono text-cyan-400 border-t border-white/10 pt-1.5">
+                    <span id="progressionCounter">SEKTOR MAP: 0 / 9</span>
                     <span id="globalTimerDisplay" class="text-right text-white">TIME: 00:00.00</span>
                 </div>
             </div>
             
-            <div id="planetStatsCard" class="cyber-panel px-6 py-4 rounded-xl text-right flex flex-col min-w-[260px]">
-                <span class="text-xs uppercase font-mono text-gray-500 font-bold">Orbitaler Ziel-Körper</span>
-                <span id="planetNameDisplay" class="orbitron text-3xl font-black text-white tracking-widest">SCANNING</span>
-                <span id="planetTypeReadout" class="text-xxs text-purple-400 font-mono mt-1 block truncate">INIT...</span>
+            <div id="planetStatsCard" class="cyber-panel px-5 py-3 rounded-xl text-right flex flex-col min-w-[260px]">
+                <span class="text-xs uppercase font-mono text-gray-500 font-bold">Ziel-Koordinaten</span>
+                <span id="planetNameDisplay" class="orbitron text-2xl font-black text-white tracking-widest">SCANNING</span>
+                <span id="planetTypeReadout" class="text-xxs text-purple-400 font-mono mt-0.5 block max-w-[240px] truncate">INIT...</span>
             </div>
         </header>
 
-        <div id="statusAlert" class="self-center cyber-panel px-12 py-8 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-xl border-cyan-500/30">
-            <h2 id="statusTitle" class="orbitron text-2xl font-black tracking-widest text-cyan-400">CONNECTING TO GROUND CORE...</h2>
-            <p id="statusDesc" class="text-xs text-gray-400 font-mono mt-3 max-w-sm mx-auto leading-relaxed">Stabilisiere den gravitativen Vektor. Verhindere strukturellen Kollaps oder orbitalen Drift der Biomasse.</p>
+        <div id="statusAlert" class="self-center cyber-panel px-10 py-6 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-md border-cyan-500/30">
+            <h2 id="statusTitle" class="orbitron text-xl font-black tracking-widest text-cyan-400">SYS_INIT_CONNECT...</h2>
+            <p id="statusDesc" class="text-xs text-gray-400 font-mono mt-2 leading-relaxed">Analysiere planetare Biosphäre. Finde die goldene Mitte der Schwerkraft!</p>
             
-            <div id="timerContainer" class="w-full bg-black/80 border border-cyan-500/30 h-5 rounded mt-5 overflow-hidden hidden p-0.5">
-                <div id="timerBar" class="bg-gradient-to-r from-green-500 via-emerald-400 to-green-600 h-full w-full rounded-sm transition-all shadow-[0_0_20px_#22c55e]"></div>
+            <div id="timerContainer" class="w-full bg-black/80 border border-cyan-500/20 h-4 rounded mt-4 overflow-hidden hidden p-0.5">
+                <div id="timerBar" class="bg-gradient-to-r from-green-500 to-emerald-400 h-full w-full rounded-sm transition-all shadow-[0_0_15px_#22c55e]"></div>
             </div>
         </div>
 
-        <footer class="w-full max-w-4xl mx-auto pointer-events-auto">
-            <div class="cyber-panel p-6 rounded-2xl flex flex-col gap-4">
+        <footer class="w-full max-w-3xl mx-auto pointer-events-auto">
+            <div class="cyber-panel p-5 rounded-xl flex flex-col gap-3">
                 
                 <div class="grid grid-cols-3 items-center">
                     <div class="text-left">
-                        <span class="text-xs font-mono text-gray-500 block">REAL-TIME INERTIAL FORCE</span>
-                        <span id="gravityDisplay" class="orbitron text-4xl font-black text-cyan-300">0.000G</span>
+                        <span class="text-xxs font-mono text-gray-500 block">AKTUELLE SCHWERKRAFT</span>
+                        <span id="gravityDisplay" class="orbitron text-3xl font-black text-cyan-300">0.000G</span>
                     </div>
-                    <div class="text-center border-x border-white/10 px-4">
-                        <span class="text-xxs font-mono text-purple-400 block tracking-widest animate-pulse">QUANTUM MATRIX DELTA</span>
-                        <span id="deltaDisplay" class="font-mono text-base text-purple-300 font-bold mt-0.5 block">0.0000 Δ</span>
+                    <div class="text-center border-x border-white/10 px-2">
+                        <span class="text-xxs font-mono text-purple-400 block tracking-widest animate-pulse">QUANTUM RESONANZ</span>
+                        <span id="deltaDisplay" class="font-mono text-sm text-purple-300 font-bold block">0.0000 Δ</span>
                     </div>
                     <div class="text-right">
-                        <span class="text-xs font-mono text-gray-500 block">REQUIRED FIELDSIGNATURE</span>
-                        <span id="targetRangeDisplay" class="orbitron text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">0.000G</span>
+                        <span class="text-xxs font-mono text-gray-500 block">GEFORDERTER SOLLWERT</span>
+                        <span id="targetRangeDisplay" class="orbitron text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">??? G</span>
                     </div>
                 </div>
 
-                <div class="relative flex flex-col pt-2">
-                    <input type="range" id="gravitySlider" min="0.001" max="4.000" step="0.001" value="1.000" class="w-full cursor-pointer">
-                    <div class="flex justify-between font-mono text-[9px] text-gray-500 mt-2 uppercase px-1">
-                        <span>0.00G (Zero Mass)</span>
-                        <span>1.00G (Terra Base)</span>
-                        <span>2.00G (Hyper Dense)</span>
-                        <span>3.00G (Mantle Crush)</span>
-                        <span>4.00G (Singularity)</span>
+                <div class="relative flex flex-col pt-1">
+                    <input type="range" id="gravitySlider" min="0.030" max="3.500" step="0.001" value="1.000" class="w-full cursor-pointer">
+                    <div class="flex justify-between font-mono text-[9px] text-gray-500 mt-1.5 uppercase px-0.5">
+                        <span>0.0G (Schwerelos)</span>
+                        <span>1.0G (Erde)</span>
+                        <span>2.0G (Hyper-Masse)</span>
+                        <span>3.5G (Kollaps)</span>
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center text-[10px] font-mono border-t border-white/5 pt-3 text-gray-600">
-                    <div>ENGINE_STATUS: <span class="text-green-500">V2_RUNNING</span> // CORE_TEMP: <span class="text-cyan-400">34.2°K</span></div>
-                    <span id="telemetryStatus" class="text-cyan-400 uppercase tracking-wider font-bold">Awaiting Resonance Alignment...</span>
-                    <div>MATRIX_BUILD: 2026.V2_MAX</div>
+                <div class="flex justify-between items-center text-[10px] font-mono border-t border-white/5 pt-2 text-gray-600">
+                    <div>ENGINE: <span class="text-green-500">SYSTEM_STABLE</span></div>
+                    <span id="telemetryStatus" class="text-cyan-400 uppercase tracking-wider font-bold">Finde den Gleichgewichtspunkt...</span>
+                    <div>SYSTEM: V2_KIDS_EDITION</div>
                 </div>
             </div>
         </footer>
     </div>
 
-    <div id="endScoreScreen" class="absolute inset-0 z-50 bg-black/95 flex items-center justify-center p-6 hidden opacity-0 transition-opacity duration-1000 pointer-events-auto">
-        <div class="cyber-panel p-12 rounded-3xl max-w-2xl w-full flex flex-col items-center border-green-500/40 text-center shadow-[0_0_60px_rgba(34,197,94,0.2)]">
-            <h1 class="orbitron text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-500 drop-shadow-[0_0_25px_rgba(34,197,94,0.5)]">
-                MISSION COMPLETE
+    <div id="endScoreScreen" class="absolute inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-700 pointer-events-auto overflow-y-auto">
+        <div class="cyber-panel p-8 rounded-2xl max-w-3xl w-full flex flex-col items-center border-green-500/30 text-center my-auto shadow-[0_0_50px_rgba(34,197,94,0.15)]">
+            <h1 class="orbitron text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-500">
+                MISSION ERFOLGREICH!
             </h1>
-            <p class="text-gray-400 font-mono mt-3 tracking-widest uppercase text-xs">Sämtliche planetare Vektorfelder wurden dauerhaft stabilisiert.</p>
+            <p class="text-gray-400 font-mono mt-1 text-xs">Du hast das Sonnensystem vor dem gravitativen Chaos gerettet!</p>
             
-            <div class="grid grid-cols-2 gap-8 my-8 w-full max-w-md border-y border-white/10 py-6">
+            <div class="grid grid-cols-2 gap-4 my-4 w-full max-w-sm border-y border-white/10 py-3">
                 <div>
-                    <span class="font-mono text-xs text-gray-500 uppercase tracking-wider block">Gesamte Operationszeit</span>
-                    <span id="finalTimeDisplay" class="orbitron text-3xl font-black text-white">00:00.00</span>
+                    <span class="font-mono text-[10px] text-gray-500 uppercase block">Gesamtzeit</span>
+                    <span id="finalTimeDisplay" class="orbitron text-2xl font-black text-white">00:00.00</span>
                 </div>
                 <div>
-                    <span class="font-mono text-xs text-gray-500 uppercase tracking-wider block">Syntonisations-Präzision</span>
-                    <span id="finalPrecisionDisplay" class="orbitron text-3xl font-black text-green-400">99.9%</span>
+                    <span class="font-mono text-[10px] text-gray-500 uppercase block">Durchschnittliche Präzision</span>
+                    <span id="finalPrecisionDisplay" class="orbitron text-2xl font-black text-green-400">99%</span>
                 </div>
             </div>
 
-            <div class="flex flex-col items-center gap-4 bg-slate-950/80 border border-white/5 p-6 rounded-2xl w-full">
-                <div class="text-left w-full border-b border-white/10 pb-2 mb-1">
-                    <span class="text-cyan-400 font-bold text-xs uppercase tracking-widest block">Quantum Security Certificate</span>
-                </div>
-                <div class="flex flex-col sm:flex-row items-center gap-6 w-full justify-center">
-                    <div id="qrcode" class="bg-white p-3 rounded-lg shadow-white/5 shadow-md"></div>
-                    <div class="text-left font-mono max-w-xs flex flex-col gap-3">
-                        <p class="text-[11px] text-gray-400 leading-relaxed">Dieser prozedural generierte Verifikations-Matrix-Code speichert Ihre mathematischen Leistungsdaten fälschungssicher im dezentralen Netz.</p>
-                        <button id="restartBtn" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded text-xs tracking-widest uppercase hover:from-cyan-400 hover:to-blue-500 border border-cyan-300/20 transition-all cursor-pointer">
-                            Re-Boot Core Engine
-                        </button>
+            <div class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 mb-5 text-left">
+                <h3 class="orbitron text-xs font-bold text-cyan-400 tracking-wider uppercase mb-2 border-b border-white/15 pb-1">
+                    🔭 Logbuch des Sonnensystems (Reale Anziehungskräfte)
+                </h3>
+                <div id="educationGrid" class="grid grid-cols-3 gap-x-4 gap-y-1 text-xs font-mono text-gray-300">
                     </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-950/40 border border-white/5 p-4 rounded-xl w-full justify-center">
+                <div id="qrcode" class="bg-white p-2 rounded shadow-md"></div>
+                <div class="text-left font-mono max-w-xs flex flex-col gap-2">
+                    <p class="text-[10px] text-gray-400">Dein prozedurales Sicherheitszertifikat speichert deine astronomischen Navigationsdaten.</p>
+                    <button id="restartBtn" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded text-xxs tracking-widest uppercase hover:from-cyan-400 hover:to-blue-500 transition-all cursor-pointer">
+                        Erneut Starten
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================================================
-        // 1. SOUND INTERACTION STATION (WEB AUDIO API RACK & OSCILLATOR FM SYNTH)
-        // ============================================================================
-        class AdvancedSoundRack {
+        // Sound Engine
+        class SimpleAudioRack {
             constructor() { this.ctx = null; }
             init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-            
-            triggerNote(freq, type, duration, volume, slideTo = null) {
+            trigger(freq, type, duration, vol) {
                 this.init(); if (!this.ctx) return;
                 try {
                     let osc = this.ctx.createOscillator();
                     let gain = this.ctx.createGain();
                     osc.type = type;
                     osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    if (slideTo) {
-                        osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
-                    }
-                    gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
                     osc.connect(gain); gain.connect(this.ctx.destination);
                     osc.start(); osc.stop(this.ctx.currentTime + duration);
                 } catch(e){}
             }
-            
-            playDeformationNoise(deviation) {
-                this.init(); if (!this.ctx || Math.abs(deviation) < 0.05) return;
-                let baseFreq = deviation > 0 ? 120 + Math.random()*80 : 350 + Math.random()*150;
-                this.triggerNote(baseFreq, deviation > 0 ? 'sawtooth' : 'sine', 0.05, 0.02);
-            }
-
-            playSliderChirp(val) { this.init(); this.triggerNote(val * 150 + 80, 'triangle', 0.06, 0.03); }
-            
-            playLockAcquired() {
-                this.init();
-                let notes = [261.63, 329.63, 392.00, 523.25, 659.25];
-                notes.forEach((f, i) => {
-                    setTimeout(() => this.triggerNote(f, 'sine', 0.4, 0.06), i * 60);
-                });
-            }
-            
-            playCriticalPulse(high) {
-                this.init();
-                this.triggerNote(high ? 220 : 70, 'sawtooth', 0.12, 0.04, high ? 110 : 40);
-            }
+            chirp(val) { this.trigger(val * 120 + 100, 'triangle', 0.05, 0.02); }
+            lock() { [300, 400, 500, 600].forEach((f, i) => setTimeout(() => this.trigger(f, 'sine', 0.3, 0.04), i*50)); }
+            pulse(high) { this.trigger(high ? 200 : 80, 'sawtooth', 0.1, 0.03); }
         }
-        const audioRack = new AdvancedSoundRack();
+        const audioRack = new SimpleAudioRack();
 
-        // ============================================================================
-        // 2. CRYPTOGRAPHIC DATA CERTIFICATE GENERATOR (NATIVE CANVAS QR PATTERN)
-        // ============================================================================
-        function createDeterministicQR(containerId, rawPayload) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            const side = 110;
-            const qCanvas = document.createElement('canvas');
-            qCanvas.width = side; qCanvas.height = side;
-            const qctx = qCanvas.getContext('2d');
-            
-            let valHash = 0;
-            for (let i = 0; i < rawPayload.length; i++) {
-                valHash = rawPayload.charCodeAt(i) + ((valHash << 5) - valHash);
-            }
-            
-            qctx.fillStyle = '#000000'; qctx.fillRect(0,0,side,side);
-            
-            qctx.fillStyle = '#ffffff';
-            const drawAnchor = (cx, cy) => {
-                qctx.fillStyle = '#ffffff'; qctx.fillRect(cx, cy, 24, 24);
-                qctx.fillStyle = '#000000'; qctx.fillRect(cx+4, cy+4, 16, 16);
-                qctx.fillStyle = '#ffffff'; qctx.fillRect(cx+8, cy+8, 8, 8);
-            };
-            drawAnchor(4, 4); drawAnchor(side - 28, 4); drawAnchor(4, side - 28);
-            
-            let iterator = 0;
-            for (let y = 4; y < side - 4; y += 4) {
-                for (let x = 4; x < side - 4; x += 4) {
-                    if ((x < 32 && y < 32) || (x > side - 32 && y < 32) || (x < 32 && y > side - 32)) continue;
-                    let bitState = Math.abs(Math.sin(valHash + iterator++)) > 0.47;
-                    qctx.fillStyle = bitState ? '#000000' : '#ffffff';
-                    qctx.fillRect(x, y, 4, 4);
+        // QR Code Generator
+        function drawQR(id, text) {
+            const el = document.getElementById(id); el.innerHTML = '';
+            const canvas = document.createElement('canvas'); canvas.width = 80; canvas.height = 80;
+            const c = canvas.getContext('2d');
+            c.fillStyle = '#000'; c.fillRect(0,0,80,80); c.fillStyle = '#fff';
+            for(let i=2; i<78; i+=4){
+                for(let j=2; j<78; j+=4){
+                    if((i<20&&j<20)||(i>60&&j<20)||(i<20&&j>60)) { c.fillRect(i,j,3,3); continue; }
+                    if(Math.random() > 0.5) c.fillRect(i,j,3,3);
                 }
             }
-            container.appendChild(qCanvas);
+            el.appendChild(canvas);
         }
 
-        // ============================================================================
-        // 3. ENGINE SETUP & GLOBAL STATE REGISTER
-        // ============================================================================
-        const gravitySlider = document.getElementById('gravitySlider');
-        const gravityDisplay = document.getElementById('gravityDisplay');
-        const deltaDisplay = document.getElementById('deltaDisplay');
-        const targetRangeDisplay = document.getElementById('targetRangeDisplay');
-        const planetNameDisplay = document.getElementById('planetNameDisplay');
-        const planetTypeReadout = document.getElementById('planetTypeReadout');
-        const progressionCounter = document.getElementById('progressionCounter');
-        const globalTimerDisplay = document.getElementById('globalTimerDisplay');
-        const statusAlert = document.getElementById('statusAlert');
-        const statusTitle = document.getElementById('statusTitle');
-        const statusDesc = document.getElementById('statusDesc');
-        const telemetryStatus = document.getElementById('telemetryStatus');
-        const timerContainer = document.getElementById('timerContainer');
-        const timerBar = document.getElementById('timerBar');
-        const endScoreScreen = document.getElementById('endScoreScreen');
-        const finalTimeDisplay = document.getElementById('finalTimeDisplay');
-        const finalPrecisionDisplay = document.getElementById('finalPrecisionDisplay');
-        const restartBtn = document.getElementById('restartBtn');
-
+        // --- PLANET DATA REGISTER ---
         const corePlanets = [
-            { name: 'Merkur', gravity: 0.380, color: '#94959c', sky: '#08080c', info: 'Innerer Core Sektor // Gesteinskruste' },
-            { name: 'Venus', gravity: 0.900, color: '#e0a265', sky: '#24150a', info: 'Säure-Atmosphäre // Starker Treibhauseffekt' },
-            { name: 'Erde', gravity: 1.000, color: '#3277e6', sky: '#030b1c', info: 'Urbane Zone Alpha // Terra Standard' },
-            { name: 'Mars', gravity: 0.380, color: '#cc3f1f', sky: '#290b05', info: 'Roter Außenposten // Instabiler Mantel' },
-            { name: 'Jupiter', gravity: 2.530, color: '#d4aa6a', sky: '#21160a', info: 'Gas-Kompression // Massen-Anomalie' },
-            { name: 'Saturn', gravity: 1.040, color: '#ebd296', sky: '#161021', info: 'Trümmerring-Feld // Gravitative Schwingung', rings: true },
-            { name: 'Uranus', gravity: 0.890, color: '#74cfda', sky: '#06161c', info: 'Kryogene Zone // Rotations-Ablenkung', rings: true },
-            { name: 'Neptun', gravity: 1.140, color: '#3a64d0', sky: '#030821', info: 'Hyper-Stürme // Äußerer Sektor-Verlauf', rings: true },
-            { name: 'Pluto', gravity: 0.060, color: '#e3d7cb', sky: '#050508', info: 'Perimeter-Fels // Minimal-Gravitation' }
+            { name: 'Merkur', gravity: 0.380, color: '#9e9e9e', sky: '#120d0a', theme: 'rock', info: 'Gesteinswüste // Extreme Hitze & Kälte' },
+            { name: 'Venus', gravity: 0.900, color: '#e39f4d', sky: '#241a05', theme: 'acid', info: 'Dichte Säurewolken // Enormer Treibhauseffekt' },
+            { name: 'Erde', gravity: 1.000, color: '#3b82f6', sky: '#020b1e', theme: 'terra', info: 'Heimat-Biosphäre // Perfekte Lebensbedingungen' },
+            { name: 'Mars', gravity: 0.380, color: '#ef4444', sky: '#260902', theme: 'rock', info: 'Der rote Planet // Riesige Eisenoxid-Wüsten' },
+            { name: 'Jupiter', gravity: 2.530, color: '#f59e0b', sky: '#241402', theme: 'gas', info: 'Größter Gasriese // Permanenter Riesensturm' },
+            { name: 'Saturn', gravity: 1.040, color: '#fef08a', sky: '#130d1f', theme: 'gas', info: 'Gas-Gigant // Prachtvolles Eistrümmer-Ringsystem', rings: true },
+            { name: 'Uranus', gravity: 0.890, color: '#22d3ee', sky: '#041824', theme: 'gas', info: 'Eisriese // Rollende Rotationsachse im All', rings: true },
+            { name: 'Neptun', gravity: 1.140, color: '#6366f1', sky: '#020521', theme: 'gas', info: 'Methan-Atmosphäre // Die stärksten Stürme', rings: true },
+            { name: 'Pluto', gravity: 0.060, color: '#cbd5e1', sky: '#05070f', theme: 'cryo', info: 'Zwergplanet am Rand // Gefrorener Stickstoff' }
         ];
 
-        let randomTourSequence = [];
+        let tourSequence = [];
         let activeTourIndex = 0;
-        let activePlanetData = null;
-        
-        let simulationEntities = [];
-        let cosmicStars = [];
+        let activePlanet = null;
+        let entities = [];
+        let stars = [];
+        let debris = [];
 
-        let isLockActive = false;
-        let lockTimestamp = null;
-        let greenStrobeIntensity = 0;
-        let runningEngine = true;
-        let soundThrottler = 0;
+        let isLocked = false;
+        let lockStart = null;
+        let engineRunning = true;
+        let gameStart = null;
+        let accuracies = [];
+        let ticksInLock = 0;
 
-        let gameStartTime = null;
-        let recordedAccuracyArray = [];
+        // ZOOM SYSTEM STATE
+        let zoomPhaseActive = false;
+        let zoomProgress = 0; // 0 bis 1
 
-        function generateCosmosBackground() {
-            cosmicStars = [];
-            for(let i=0; i<300; i++) {
-                cosmicStars.push({
-                    x: Math.random() * 3200,
-                    y: Math.random() * 2000,
-                    r: Math.random() * 2.2 + 0.3,
-                    parallaxFactor: Math.random() * 0.35 + 0.05
-                });
-            }
+        function initStars() {
+            stars = [];
+            for(let i=0; i<200; i++) stars.push({ x: Math.random()*3000, y: Math.random()*2000, r: Math.random()*2+0.5, p: Math.random()*0.3+0.05 });
         }
 
-        function shuffleTourPlanets() {
-            let temp = [...corePlanets];
-            randomTourSequence = [];
-            while(temp.length > 0) {
-                let rIdx = Math.floor(Math.random() * temp.length);
-                randomTourSequence.push(temp.splice(rIdx, 1)[0]);
-            }
-        }
-
-        // ============================================================================
-        // 4. VERTEX-ORIENTED DATA STRUCTURES FOR EXTENSIVE SIMULATION OBJECTS
-        // ============================================================================
-        
-        // --- ARCHITEKTUR MODULE (HÄUSER) ---
-        class MegacityBuilding {
+        // --- ENTITY CLASSES (THEMENGEBUNDEN) ---
+        class AdaptiveBuilding {
             constructor(x) {
-                this.x = x;
-                this.style = Math.floor(Math.random() * 3);
-                this.baseW = 90 + Math.random() * 50;
-                this.baseH = 200 + Math.random() * 250;
-                this.w = this.baseW;
-                this.h = this.baseH;
-                
-                this.hue = Math.floor(Math.random() * 30) + 200;
-                this.floatAngle = 0;
-                this.floatRotSpeed = (Math.random() - 0.5) * 0.015;
-                this.vy = 0;
-                this.y = (canvas.height - 140) - this.h;
-                this.shakeX = 0;
+                this.x = x; this.baseW = 80 + Math.random()*50; this.baseH = 160 + Math.random()*200;
+                this.w = this.baseW; this.h = this.baseH; this.y = (canvas.height - 140) - this.h;
+                this.vy = 0; this.rot = 0; this.rotSpd = (Math.random()-0.5)*0.01;
             }
-
-            update(deviation, isPerfect) {
-                let groundY = canvas.height - 140;
-
-                if (isPerfect) {
-                    this.w = this.baseW; this.h = this.baseH;
-                    this.shakeX = 0; this.floatAngle *= 0.82;
-                    let targetY = groundY - this.h;
-                    if (this.y < targetY) {
-                        this.vy += 0.6; this.y += this.vy;
-                        if (this.y >= targetY) { this.y = targetY; this.vy = 0; }
-                    } else { this.y = targetY; }
-                } 
-                else {
-                    if (deviation < -0.02) {
-                        let power = Math.abs(deviation);
-                        this.vy -= (Math.random() * 0.03 + 0.01) * power;
-                        this.vy *= 0.95;
-                        this.y += this.vy;
-                        this.floatAngle += this.floatRotSpeed * power;
-                        if (this.y < -500) this.y = canvas.height + 100;
-                    } 
-                    else if (deviation > 0.02) {
-                        let crushAmt = Math.min(0.78, deviation * 0.25);
-                        this.h = this.baseH * (1 - crushAmt);
-                        this.w = this.baseW * (1 + crushAmt * 0.5);
-                        this.y = groundY - this.h;
-                        this.shakeX = (Math.random() - 0.5) * (deviation * 8);
-
-                        if (deviation > 0.6 && Math.random() > 0.85) {
-                            createParticle(this.x + Math.random()*this.w, this.y + Math.random()*this.h, '#00ffff', (Math.random()-0.5)*8, -Math.random()*6);
-                        }
+            update(dev, type) {
+                let ground = canvas.height - 140;
+                if(zoomPhaseActive) return;
+                
+                if (isLocked) {
+                    this.w = this.baseW; this.h = this.baseH; this.rot *= 0.8;
+                    let targetY = ground - this.h;
+                    if (this.y < targetY) { this.vy += 0.5; this.y += this.vy; if(this.y >= targetY) { this.y = targetY; this.vy = 0; } }
+                    else this.y = targetY;
+                } else {
+                    if (dev < -0.02) {
+                        this.vy -= (Math.random()*0.02 + 0.01) * Math.abs(dev); this.vy *= 0.95; this.y += this.vy;
+                        this.rot += this.rotSpd * Math.abs(dev);
+                        if(this.y < -400) this.y = canvas.height + 100;
+                    } else if (dev > 0.02) {
+                        let c = Math.min(0.75, dev * 0.25); this.h = this.baseH * (1 - c); this.w = this.baseW * (1 + c*0.4);
+                        this.y = ground - this.h; this.rot = 0;
                     }
                 }
             }
+            draw(theme) {
+                ctx.save(); ctx.translate(this.x + this.w/2, this.y + this.h/2); ctx.rotate(this.rot);
+                let hX = -this.w/2, hY = -this.h/2;
+                ctx.lineWidth = 2;
 
-            draw() {
-                ctx.save();
-                ctx.translate(this.x + this.w/2 + this.shakeX, this.y + this.h/2);
-                ctx.rotate(this.floatAngle);
-
-                let hX = -this.w / 2;
-                let hY = -this.h / 2;
-
-                ctx.lineWidth = 2.5;
-                ctx.strokeStyle = `hsla(${this.hue}, 100%, 55%, 0.9)`;
-                ctx.fillStyle = `hsla(${this.hue}, 95%, 6%, 0.9)`;
-                ctx.shadowBlur = isLockActive ? 4 : 16;
-                ctx.shadowColor = `hsla(${this.hue}, 100%, 55%, 0.4)`;
-
-                if (this.style === 0) {
-                    ctx.fillRect(hX, hY, this.w, this.h);
-                    ctx.strokeRect(hX, hY, this.w, this.h);
-                    
-                    ctx.fillStyle = `hsla(${this.hue}, 100%, 75%, 0.35)`;
-                    let rStepX = this.w / 5;
-                    let rStepY = Math.max(12, this.h / 15);
-                    for(let fx = hX+8; fx < hX+this.w-8; fx+=rStepX) {
-                        for(let fy = hY+12; fy < hY+this.h-12; fy+=rStepY) {
-                            if(Math.random() > 0.2) ctx.fillRect(fx, fy, rStepX*0.6, rStepY*0.5);
-                        }
-                    }
-                } 
-                else if (this.style === 1) {
-                    ctx.beginPath();
-                    ctx.moveTo(hX, this.h/2);
-                    ctx.lineTo(0, hY);
-                    ctx.lineTo(hX + this.w, this.h/2);
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = '#ff00ff';
-                    ctx.fillRect(-3, hY + 40, 6, this.h - 50);
-                } 
-                else {
-                    ctx.fillRect(hX + 10, hY, this.w - 20, this.h);
-                    ctx.strokeRect(hX + 10, hY, this.w - 20, this.h);
-                    ctx.strokeStyle = '#ffaa00';
-                    ctx.lineWidth = 1.5;
-                    for(let i = hY + 20; i < hY + this.h - 20; i += 16) {
-                        ctx.beginPath(); ctx.moveTo(xPos => hX + 20, i); ctx.lineTo(hX + this.w - 20, i); ctx.stroke();
-                    }
+                if (theme === 'gas') {
+                    // Schwebende Extraktions-Plattform statt Gebäude
+                    ctx.strokeStyle = '#e855f7'; ctx.fillStyle = 'rgba(30, 10, 40, 0.85)';
+                    ctx.fillRect(hX, hY + this.h*0.3, this.w, this.h * 0.2);
+                    ctx.strokeRect(hX, hY + this.h*0.3, this.w, this.h * 0.2);
+                    ctx.fillStyle = '#00f0ff'; ctx.fillRect(-3, hY + this.h*0.5, 6, this.h*0.5);
+                } else if (theme === 'acid') {
+                    ctx.strokeStyle = '#a3e635'; ctx.fillStyle = 'rgba(15, 25, 10, 0.9)';
+                    ctx.fillRect(hX, hY, this.w, this.h); ctx.strokeRect(hX, hY, this.w, this.h);
+                } else if (theme === 'rock') {
+                    ctx.strokeStyle = '#ea580c'; ctx.fillStyle = 'rgba(25, 15, 10, 0.9)';
+                    ctx.fillRect(hX, hY, this.w, this.h); ctx.strokeRect(hX, hY, this.w, this.h);
+                } else if (theme === 'cryo') {
+                    ctx.strokeStyle = '#38bdf8'; ctx.fillStyle = 'rgba(10, 20, 35, 0.95)';
+                    ctx.beginPath(); ctx.moveTo(hX, this.h/2); ctx.lineTo(0, hY); ctx.lineTo(hX+this.w, this.h/2); ctx.closePath(); ctx.fill(); ctx.stroke();
+                } else { // Terra
+                    ctx.strokeStyle = '#00f0ff'; ctx.fillStyle = 'rgba(5, 10, 25, 0.9)';
+                    ctx.fillRect(hX, hY, this.w, this.h); ctx.strokeRect(hX, hY, this.w, this.h);
                 }
                 ctx.restore();
             }
         }
 
-        // --- INVERSE KINEMATIK ALIEN CITIZENS ---
-        class LivingAlienCitizen {
+        class AdaptiveCitizen {
             constructor(x) {
-                this.x = x;
-                this.baseW = 24; this.baseH = 50;
-                this.w = this.baseW; this.h = this.baseH;
-                this.y = (canvas.height - 140) - this.h;
+                this.x = x; this.baseW = 20; this.baseH = 40; this.w = this.baseW; this.h = this.baseH;
+                this.y = (canvas.height - 140) - this.h; this.vx = (Math.random()*1.2 + 0.4) * (Math.random()>0.5?1:-1);
+                this.vy = 0; this.rot = 0; this.walkCycle = Math.random()*50;
+            }
+            update(dev) {
+                let ground = canvas.height - 140;
+                if(zoomPhaseActive) return;
+
+                if (isLocked) {
+                    this.w = this.baseW; this.h = this.baseH; this.rot *= 0.8; this.x += this.vx; this.walkCycle += 0.15;
+                    let targetY = ground - this.h;
+                    if(this.y < targetY) { this.vy += 0.6; this.y += this.vy; if(this.y >= targetY) { this.y = targetY; this.vy = 0; } }
+                    else this.y = targetY;
+                } else {
+                    if (dev < -0.02) {
+                        this.vy -= (Math.random()*0.05 + 0.02) * Math.abs(dev); this.vy *= 0.94; this.y += this.vy;
+                        this.x += this.vx * 0.4; this.rot += (this.vx > 0 ? 0.04 : -0.04);
+                    } else if (dev > 0.02) {
+                        let c = Math.min(0.8, dev * 0.35); this.h = this.baseH * (1 - c); this.w = this.baseW * (1 + c*0.6);
+                        this.y = ground - this.h; this.x += this.vx * (1 - c*0.9);
+                    } else {
+                        this.x += this.vx; this.walkCycle += 0.1;
+                    }
+                }
+                if(this.x > canvas.width + 40) this.x = -this.w; if(this.x < -40) this.x = canvas.width;
+            }
+            draw(theme) {
+                ctx.save(); ctx.translate(this.x + this.w/2, this.y + this.h/2); ctx.rotate(this.rot);
+                ctx.lineWidth = 1.5;
                 
-                this.vx = (0.5 + Math.random()*1.2) * (Math.random() > 0.5 ? 1 : -1);
-                this.vy = 0;
-                this.floatAngle = 0;
-                this.floatRotSpeed = (Math.random() - 0.5) * 0.06;
-                this.hue = Math.floor(Math.random() * 40) + 120;
-                this.limbCycle = Math.random() * 100;
-            }
-
-            update(deviation, isPerfect) {
-                let groundY = canvas.height - 140;
-
-                if (isPerfect) {
-                    this.w = this.baseW; this.h = this.baseH;
-                    this.floatAngle *= 0.8;
-                    this.x += this.vx;
-                    this.limbCycle += 0.2;
-
-                    let targetY = groundY - this.h;
-                    if (this.y < targetY) {
-                        this.vy += 0.7; this.y += this.vy;
-                        if (this.y >= targetY) { this.y = targetY; this.vy = 0; }
-                    } else { this.y = targetY; }
-                } 
-                else {
-                    if (deviation < -0.02) {
-                        let power = Math.abs(deviation);
-                        this.vy -= (Math.random() * 0.07 + 0.03) * power;
-                        this.vy *= 0.94;
-                        this.y += this.vy;
-                        this.x += this.vx * 0.3;
-                        this.floatAngle += this.floatRotSpeed * power;
-                        this.limbCycle += 0.6;
-
-                        if (this.y < -100) this.y = canvas.height + 40;
-                    } 
-                    else if (deviation > 0.02) {
-                        let crushAmt = Math.min(0.8, deviation * 0.38);
-                        this.h = this.baseH * (1 - crushAmt);
-                        this.w = this.baseW * (1 + crushAmt * 0.8);
-                        this.y = groundY - this.h;
-                        this.floatAngle = 0;
-                        this.x += this.vx * (1 - crushAmt * 0.95);
-                        this.limbCycle += 0.05;
-                    }
+                if (theme === 'gas') { // Schwebende Leucht-Qualle
+                    ctx.fillStyle = 'rgba(232,85,247,0.4)'; ctx.strokeStyle = '#e855f7';
+                    ctx.beginPath(); ctx.arc(0, -this.h/4, this.w/2, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+                } else if (theme === 'rock') { // Fels-Krabbe
+                    ctx.fillStyle = '#7c2d12'; ctx.strokeStyle = '#ea580c';
+                    ctx.fillRect(-this.w/2, 0, this.w, this.h/2); ctx.strokeRect(-this.w/2, 0, this.w, this.h/2);
+                } else if (theme === 'acid') { // Schleim-Pod
+                    ctx.fillStyle = '#14532d'; ctx.strokeStyle = '#22c55e';
+                    ctx.beginPath(); ctx.ellipse(0, this.h/4, this.w/2, this.h/4, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                } else if (theme === 'cryo') { // Eiskristall-Wesen
+                    ctx.strokeStyle = '#06b6d4'; ctx.strokeRect(-this.w/3, -this.h/3, this.w*0.6, this.h*0.6);
+                } else { // Humanoider Läufer
+                    ctx.strokeStyle = '#00f0ff'; ctx.fillStyle = '#020617';
+                    ctx.strokeRect(-this.w/2, -this.h/4, this.w, this.h/2);
+                    ctx.beginPath(); ctx.arc(0, -this.h/3, this.w/4, 0, Math.PI*2); ctx.stroke();
                 }
-
-                if (this.x > canvas.width + 60) this.x = -this.w;
-                if (this.x < -60) this.x = canvas.width;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x + this.w/2, this.y + this.h/2);
-                ctx.rotate(this.floatAngle);
-
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = `hsla(${this.hue}, 100%, 50%, 0.95)`;
-                ctx.fillStyle = `hsla(${this.hue}, 90%, 10%, 0.8)`;
-
-                ctx.fillRect(-this.w/2, -this.h/4, this.w, this.h/2);
-                ctx.strokeRect(-this.w/2, -this.h/4, this.w, this.h/2);
-
-                ctx.beginPath();
-                ctx.arc(0, -this.h/3, this.w/3, 0, Math.PI*2);
-                ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#ff0055';
-                ctx.fillRect(-this.w/6, -this.h/3 - 2, this.w/3, 4);
-
-                let limbOffset = Math.sin(this.limbCycle) * 12;
-                ctx.strokeStyle = `hsla(${this.hue}, 100%, 50%, 1)`;
-
-                ctx.beginPath();
-                ctx.moveTo(-this.w/4, this.h/4); ctx.lineTo(-this.w/3 + limbOffset, this.h/2 + 6);
-                ctx.moveTo(this.w/4, this.h/4);  ctx.lineTo(this.w/3 - limbOffset, this.h/2 + 6);
-                ctx.moveTo(-this.w/2, -this.h/8); ctx.lineTo(-this.w/2 - 8, limbOffset);
-                ctx.moveTo(this.w/2, -this.h/8);  ctx.lineTo(this.w/2 + 8, -limbOffset);
-                ctx.stroke();
-
                 ctx.restore();
             }
         }
 
-        // --- CYBER-TRUCKS ---
-        class GroundCyberTruck {
-            constructor() {
-                this.baseW = 65; this.baseH = 24;
-                this.w = this.baseW; this.h = this.baseH;
-                this.x = Math.random() * canvas.width;
-                this.y = (canvas.height - 140) - this.h;
-                this.vx = (3.5 + Math.random() * 3) * (Math.random() > 0.5 ? 1 : -1);
-                this.vy = 0;
-                this.floatAngle = 0;
-                this.floatRotSpeed = (Math.random() - 0.5) * 0.09;
-                this.hue = Math.floor(Math.random() * 30) + 10;
-                this.wheelSpin = 0;
-            }
-
-            update(deviation, isPerfect) {
-                let groundY = canvas.height - 140;
-
-                if (isPerfect) {
-                    this.w = this.baseW; this.h = this.baseH;
-                    this.floatAngle *= 0.7;
-                    this.x += this.vx;
-                    this.wheelSpin += this.vx * 0.1;
-                    
-                    let targetY = groundY - this.h;
-                    if (this.y < targetY) {
-                        this.vy += 0.8; this.y += this.vy;
-                        if (this.y >= targetY) { this.y = targetY; this.vy = 0; }
-                    } else { this.y = targetY; }
-                } 
-                else {
-                    if (deviation < -0.02) {
-                        let power = Math.abs(deviation);
-                        this.vy -= (Math.random() * 0.09 + 0.04) * power;
-                        this.vy *= 0.94;
-                        this.y += this.vy;
-                        this.x += this.vx * 0.15;
-                        this.floatAngle += this.floatRotSpeed * power;
-                        if (this.y < -150) this.y = canvas.height + 60;
-                    } 
-                    else if (deviation > 0.02) {
-                        let crushAmt = Math.min(0.85, deviation * 0.45);
-                        this.h = this.baseH * (1 - crushAmt);
-                        this.w = this.baseW * (1 + crushAmt * 0.6);
-                        this.y = groundY - this.h;
-                        this.floatAngle = 0;
-                        this.x += this.vx * (1 - crushAmt * 0.95);
-                        
-                        if (Math.random() > 0.6) {
-                            createParticle(this.x + this.w/2, groundY, '#ffaa00', -this.vx * 0.5, -(Math.random()*4));
-                        }
-                    }
-                }
-
-                if (this.x > canvas.width + 120) this.x = -this.w;
-                if (this.x < -120) this.x = canvas.width;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x + this.w/2, this.y + this.h/2);
-                ctx.rotate(this.floatAngle);
-
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = `hsla(${this.hue}, 100%, 50%, 0.95)`;
-                ctx.fillStyle = `hsla(${this.hue}, 90%, 10%, 0.85)`;
-
-                ctx.beginPath();
-                ctx.moveTo(-this.w/2, this.h/2);
-                ctx.lineTo(-this.w/2, -this.h/4);
-                ctx.lineTo(-this.w/4, -this.h/2);
-                ctx.lineTo(this.w/4, -this.h/4);
-                ctx.lineTo(this.w/2, 0);
-                ctx.lineTo(this.w/2, this.h/2);
-                ctx.closePath();
-                ctx.fill(); ctx.stroke();
-
-                ctx.fillStyle = '#00f0ff';
-                ctx.save();
-                ctx.translate(-this.w/4, this.h/2);
-                ctx.rotate(this.wheelSpin);
-                ctx.strokeRect(-5, -5, 10, 10);
-                ctx.restore();
-
-                ctx.save();
-                ctx.translate(this.w/4, this.h/2);
-                ctx.rotate(this.wheelSpin);
-                ctx.strokeRect(-5, -5, 10, 10);
-                ctx.restore();
-
-                ctx.restore();
-            }
+        // Particle System
+        function spawnDebris(x, y, color, vx, vy) {
+            debris.push({ x, y, color, vx, vy, alpha: 1.0, decay: Math.random()*0.02 + 0.01 });
         }
 
-        // --- TRÜMMER-PARTIKEL ---
-        class VectorDebrisParticle {
-            constructor(x, y, color, vx, vy) {
-                this.x = x; this.y = y;
-                this.vx = vx; this.vy = vy;
-                this.color = color;
-                this.alpha = 1.0;
-                this.decay = 0.01 + Math.random()*0.02;
-                this.r = Math.random() * 4 + 1.5;
+        function populateSektor() {
+            entities = []; debris = [];
+            for (let x = 40; x < canvas.width - 100; x += 150) {
+                entities.push(new AdaptiveBuilding(x + (Math.random()*20 - 10)));
             }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                this.alpha -= this.decay;
-            }
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.r, this.r);
-                ctx.restore();
-            }
+            for(let i=0; i<15; i++) entities.push(new AdaptiveCitizen(Math.random()*canvas.width));
         }
-
-        function createParticle(x, y, color, vx, vy) {
-            environmentalParticlesPool.push(new VectorDebrisParticle(x, y, color, vx, vy));
-        }
-
-        let environmentalParticlesPool = [];
 
         // ============================================================================
-        // 5. APPLICATION LOGIC CORE & TOUR SYSTEM
+        // VISUAL SOLAR SYSTEM ZOOM TIMELINE
         // ============================================================================
-        function populateSimCity() {
-            simulationEntities = [];
-            environmentalParticlesPool = [];
+        function triggerSonnensystemZoom(callback) {
+            zoomPhaseActive = true;
+            zoomProgress = 0;
+            document.getElementById('zoomOverlay').classList.remove('opacity-0');
+            document.getElementById('zoomPlanetTitle').textContent = `ANFLUG: ${activePlanet.name.toUpperCase()}`;
             
-            for (let x = 30; x < canvas.width - 120; x += 160) {
-                simulationEntities.push(new MegacityBuilding(x + (Math.random() * 30 - 15)));
-            }
-            for(let i=0; i<20; i++) {
-                simulationEntities.push(new LivingAlienCitizen(Math.random() * canvas.width));
-            }
-            for(let i=0; i<6; i++) {
-                simulationEntities.push(new GroundCyberTruck());
-            }
+            let interval = setInterval(() => {
+                zoomProgress += 0.015;
+                if (zoomProgress >= 1) {
+                    clearInterval(interval);
+                    zoomPhaseActive = false;
+                    document.getElementById('zoomOverlay').classList.add('opacity-0');
+                    callback();
+                }
+            }, 25);
         }
 
-        function spawnQuantumStrobeSplashes() {
-            let colors = ['#00f0ff', '#22c55e', '#ffffff', '#e855f7'];
-            for(let i=0; i<250; i++) {
-                let rx = Math.random() * canvas.width;
-                let ry = Math.random() * (canvas.height - 140);
-                let rc = colors[Math.floor(Math.random() * colors.length)];
-                createParticle(rx, ry, rc, (Math.random()-0.5)*14, (Math.random()-0.5)*14);
-            }
-        }
-
-        function buildTargetSector(index) {
-            if (index >= randomTourSequence.length) {
-                completeActiveTour();
-                return;
-            }
-            activePlanetData = randomTourSequence[activeTourIndex];
-            isLockActive = false;
-            lockTimestamp = null;
-
-            gravitySlider.value = (Math.random() * 3.5 + 0.15).toFixed(3);
-            gravitySlider.classList.remove('calibrated-slider');
-            timerContainer.classList.add('hidden');
-
-            progressionCounter.textContent = `SEKTOR MAP: ${activeTourIndex + 1} / ${randomTourSequence.length}`;
-            planetNameDisplay.textContent = activePlanetData.name.toUpperCase();
-            planetTypeReadout.textContent = `SYS_INFO: ${activePlanetData.info}`;
-            targetRangeDisplay.textContent = `${activePlanetData.gravity.toFixed(3)}G`;
-
-            populateSimCity();
-        }
-
-        function completeActiveTour() {
-            runningEngine = false;
-            let fullTimeElapsed = Date.now() - gameStartTime;
-            let precisionSum = recordedAccuracyArray.reduce((a,b)=>a+b, 0);
-            let avgPrecision = ((precisionSum / recordedAccuracyArray.length) * 100).toFixed(1) + "%";
-
-            document.getElementById('gameUI').classList.add('pointer-events-none');
-            endScoreScreen.classList.remove('hidden');
-            setTimeout(() => endScoreScreen.classList.add('opacity-100'), 40);
-
-            finalTimeDisplay.textContent = formatTimerString(fullTimeElapsed);
-            finalPrecisionDisplay.textContent = avgPrecision;
-
-            let encString = `GRAVITY_CORE_V2_SUCCESS//T:${formatTimerString(fullTimeElapsed)}//P:${avgPrecision}//ID:${Math.floor(Math.random()*999999)}`;
-            createDeterministicQR('qrcode', encString);
-        }
-
-        function formatTimerString(ms) {
-            let total = Math.floor(ms / 1000);
-            let m = Math.floor(total / 60).toString().padStart(2, '0');
-            let s = (total % 60).toString().padStart(2, '0');
-            let msPart = Math.floor((ms % 1000) / 10).toString().padStart(2, '0');
-            return `${m}:${s}.${msPart}`;
-        }
-
-        // ============================================================================
-        // 6. SCENE RENDERING PIPELINE (BACKGROUND & PARALLAX ENGINE)
-        // ============================================================================
-        function renderCoreGridScene(deviation) {
-            let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            bgGrad.addColorStop(0, '#010105');
-            bgGrad.addColorStop(1, activePlanetData.sky);
-            ctx.fillStyle = bgGrad;
+        function renderSonnensystemMap() {
+            // Schwarzer Raum im Zoom-Modus
+            ctx.fillStyle = '#000005';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = '#ffffff';
-            cosmicStars.forEach(s => {
-                let dynamicDriftX = Math.sin(Date.now() * 0.0008) * (deviation * 14) * s.parallaxFactor;
-                ctx.globalAlpha = s.parallaxFactor * 2.5;
-                ctx.fillRect((s.x + dynamicDriftX) % canvas.width, s.y, s.r, s.r);
-            });
-            ctx.globalAlpha = 1.0;
+            let centerX = canvas.width / 2;
+            let centerY = canvas.height / 2;
+
+            // 1. Die glühende Zentral-Sonne
+            let sunRad = 55 * (1 - zoomProgress * 0.7);
+            let sunGrad = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, sunRad * 1.5);
+            sunGrad.addColorStop(0, '#fef08a'); sunGrad.addColorStop(0.3, '#f59e0b'); sunGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = sunGrad; ctx.beginPath(); ctx.arc(centerX, centerY, sunRad * 1.8, 0, Math.PI*2); ctx.fill();
+
+            // Finden des Index im realen Sonnensystem für die Umlaufbahn-Skalierung
+            let realOrderIdx = corePlanets.findIndex(p => p.name === activePlanet.name);
+            if(realOrderIdx === -1) realOrderIdx = 2;
+
+            // 2. Zeichne die planetaren Kreisbahnen (Umlaufbahnen)
+            ctx.lineWidth = 1;
+            for(let i = 0; i < corePlanets.length; i++) {
+                let orbitRadius = 80 + i * 32;
+                // Wenn wir hineinzoomen, blähen sich die Bahnen dramatisch auf
+                let dynamicOrbitRad = orbitRadius * (1 + zoomProgress * 6);
+                
+                ctx.strokeStyle = (i === realOrderIdx) ? 'rgba(0, 240, 255, 0.35)' : 'rgba(255, 255, 255, 0.05)';
+                ctx.beginPath(); ctx.arc(centerX, centerY, dynamicOrbitRad, 0, Math.PI*2); ctx.stroke();
+
+                // Einen kleinen Punkt für jeden anderen Planeten auf seiner Bahn andeuten
+                if (i !== realOrderIdx && zoomProgress < 0.6) {
+                    let angle = (Date.now() * 0.0002 * (8 - i)) + i;
+                    let px = centerX + Math.cos(angle) * dynamicOrbitRad;
+                    let py = centerY + Math.sin(angle) * dynamicOrbitRad;
+                    ctx.fillStyle = corePlanets[i].color;
+                    ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+                }
+            }
+
+            // 3. Unser Zielplanet nähert sich der Kamera an
+            let targetOrbitRad = (80 + realOrderIdx * 32) * (1 + zoomProgress * 6);
+            let targetAngle = Date.now() * 0.0001 + realOrderIdx; // Fester Winkel während des Zooms
+            
+            // Interpolation der Position: von der Umlaufbahn zur Bildschirmmitte (Vollbild-Fokus)
+            let startX = centerX + Math.cos(targetAngle) * targetOrbitRad;
+            let startY = centerY + Math.sin(targetAngle) * targetOrbitRad;
+            
+            let currentX = startX + (centerX - startX) * (zoomProgress * zoomProgress);
+            let currentY = startY + (centerY - startY) * (zoomProgress * zoomProgress);
+            
+            // Der Planet wächst massiv an beim Reinzoomen
+            let currentPlanetRad = 6 + (zoomProgress * 280);
+
+            let planetGrad = ctx.createRadialGradient(currentX, currentY, currentPlanetRad*0.1, currentX, currentY, currentPlanetRad);
+            planetGrad.addColorStop(0, '#ffffff');
+            planetGrad.addColorStop(0.2, activePlanet.color);
+            planetGrad.addColorStop(1, '#000000');
 
             ctx.save();
-            let pX = canvas.width * 0.76;
-            let pY = canvas.height * 0.3;
-            let pRadius = 135;
+            ctx.shadowBlur = 30; ctx.shadowColor = activePlanet.color;
+            ctx.fillStyle = planetGrad;
+            ctx.beginPath(); ctx.arc(currentX, currentY, currentPlanetRad, 0, Math.PI*2); ctx.fill();
+            ctx.restore();
+        }
 
-            ctx.shadowBlur = isLockActive ? 25 : 55;
-            ctx.shadowColor = activePlanetData.color;
-            ctx.fillStyle = activePlanetData.color;
-            ctx.beginPath(); ctx.arc(pX, pY, pRadius, 0, Math.PI*2); ctx.fill();
-            ctx.shadowBlur = 0;
+        // ============================================================================
+        // CORE ENGINE LOGIC
+        // ============================================================================
+        function prepareSector(index) {
+            if (index >= tourSequence.length) {
+                triggerSimulationEnd();
+                return;
+            }
+            activePlanet = tourSequence[activeTourIndex];
+            isLocked = false; lockStart = null; ticksInLock = 0;
 
-            if (activePlanetData.rings) {
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-                ctx.lineWidth = 14;
-                ctx.save();
-                ctx.translate(pX, pY);
-                ctx.scale(2.6, 0.35);
-                ctx.rotate(-Math.PI / 6);
-                ctx.beginPath(); ctx.arc(0, 0, pRadius + 50, 0, Math.PI*2); ctx.stroke();
-                ctx.restore();
+            gravitySlider.value = (Math.random() * 2.8 + 0.2).toFixed(3);
+            gravitySlider.className = 'w-full cursor-pointer';
+            document.getElementById('timerContainer').classList.add('hidden');
+
+            progressionCounter.textContent = `SEKTOR MAP: ${activeTourIndex + 1} / ${tourSequence.length}`;
+            planetNameDisplay.textContent = activePlanet.name.toUpperCase();
+            planetTypeReadout.textContent = `SYS_INFO: ${activePlanet.info}`;
+            
+            // "GEFORDERTER SOLLWERT" zeigt nun ??? G an (Kein Schummeln!)
+            targetRangeDisplay.textContent = `??? G`;
+
+            triggerSonnensystemZoom(() => {
+                populateSektor();
+            });
+        }
+
+        function triggerSimulationEnd() {
+            engineRunning = false;
+            let elapsed = Date.now() - gameStart;
+            let precAvg = ((accuracies.reduce((a,b)=>a+b,0) / accuracies.length)*100).toFixed(0) + "%";
+
+            document.getElementById('gameUI').classList.add('pointer-events-none');
+            const endScreen = document.getElementById('endScoreScreen');
+            endScreen.classList.remove('hidden');
+            setTimeout(() => endScreen.classList.add('opacity-100'), 50);
+
+            document.getElementById('finalTimeDisplay').textContent = formatTime(elapsed);
+            document.getElementById('finalPrecisionDisplay').textContent = precAvg;
+
+            // BEFÜLLEN DES LERN-LOGBUCH-RASTERS (Jetzt stehen die Zahlen neben den Planeten!)
+            const eduGrid = document.getElementById('educationGrid');
+            eduGrid.innerHTML = '';
+            corePlanets.forEach(p => {
+                let div = document.createElement('div');
+                div.className = "flex justify-between border-b border-white/5 py-0.5 pr-2";
+                div.innerHTML = `<span style="color:${p.color}">${p.name}:</span> <span class="font-bold text-white">${p.gravity.toFixed(3)} G</span>`;
+                eduGrid.appendChild(div);
+            });
+
+            drawQR('qrcode', `GCORE_V2_COMPLETE//TIME:${formatTime(elapsed)}//PREC:${precAvg}`);
+        }
+
+        function formatTime(ms) {
+            let s = Math.floor(ms/1000);
+            let m = Math.floor(s/60).toString().padStart(2,'0');
+            s = (s%60).toString().padStart(2,'0');
+            let msp = Math.floor((ms%1000)/10).toString().padStart(2,'0');
+            return `${m}:${s}.${msp}`;
+        }
+
+        function drawNormalScene(dev) {
+            let bg = ctx.createLinearGradient(0,0,0,canvas.height);
+            bg.addColorStop(0, '#000004'); bg.addColorStop(1, activePlanet.sky);
+            ctx.fillStyle = bg; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+            // Sterne rendern
+            ctx.fillStyle = '#fff';
+            stars.forEach(s => { ctx.globalAlpha = s.p * 2; ctx.fillRect((s.x + Math.sin(Date.now()*0.0005)*dev*20*s.p)%canvas.width, s.y, s.r, s.r); });
+            ctx.globalAlpha = 1.0;
+
+            // Atmosphärische Wolken/Gas-Effekte je nach Thema generieren
+            if (activePlanet.theme === 'gas' || activePlanet.theme === 'acid') {
+                ctx.fillStyle = activePlanet.theme === 'gas' ? 'rgba(232, 85, 247, 0.04)' : 'rgba(163, 230, 53, 0.03)';
+                for(let i=0; i<3; i++) {
+                    ctx.fillRect(0, canvas.height*0.2 + Math.sin(Date.now()*0.001 + i)*30, canvas.width, 80);
+                }
+            }
+
+            // Der Himmelskörper im Hintergrund
+            ctx.save();
+            let pX = canvas.width * 0.8; let pY = canvas.height * 0.28; let pR = 100;
+            ctx.shadowBlur = isLocked ? 20 : 40; ctx.shadowColor = activePlanet.color;
+            ctx.fillStyle = activePlanet.color;
+            ctx.beginPath(); ctx.arc(pX, pY, pR, 0, Math.PI*2); ctx.fill();
+            
+            if (activePlanet.rings) {
+                ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 10;
+                ctx.save(); ctx.translate(pX, pY); ctx.scale(2.4, 0.3); ctx.rotate(-Math.PI/7);
+                ctx.beginPath(); ctx.arc(0,0, pR+40, 0, Math.PI*2); ctx.stroke(); ctx.restore();
             }
             ctx.restore();
 
-            let groundLevelY = canvas.height - 140;
-            ctx.strokeStyle = isLockActive ? 'rgba(34, 197, 94, 0.6)' : 'rgba(0, 240, 255, 0.3)';
-            ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.moveTo(0, groundLevelY); ctx.lineTo(canvas.width, groundLevelY); ctx.stroke();
-
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = isLockActive ? 'rgba(34, 197, 94, 0.16)' : 'rgba(0, 240, 255, 0.07)';
-            for (let xPos = 0; xPos < canvas.width; xPos += 70) {
-                ctx.beginPath(); ctx.moveTo(xPos, groundLevelY); ctx.lineTo(xPos + (xPos - canvas.width/2) * 1.6, canvas.height); ctx.stroke();
-            }
+            // Bodenlinie
+            let ground = canvas.height - 140;
+            ctx.strokeStyle = isLocked ? 'rgba(34, 197, 94, 0.5)' : 'rgba(0, 240, 255, 0.25)';
+            ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, ground); ctx.lineTo(canvas.width, ground); ctx.stroke();
         }
 
         // ============================================================================
-        // 7. REAL-TIME MATH EXECUTION & TICK PIPELINE
+        // ENGINE EXECUTION HEARTBEAT
         // ============================================================================
-        function executeMainEngineTick() {
-            if (!runningEngine) return;
+        function mainLoop() {
+            if (!engineRunning) return;
 
-            let liveRuntime = Date.now() - gameStartTime;
-            globalTimerDisplay.textContent = `TIME: ${formatTimerString(liveRuntime)}`;
+            if (zoomPhaseActive) {
+                renderSonnensystemMap();
+                requestAnimationFrame(mainLoop);
+                return;
+            }
 
-            let currentSliderVal = parseFloat(gravitySlider.value);
-            gravityDisplay.textContent = `${currentSliderVal.toFixed(3)}G`;
+            document.getElementById('globalTimerDisplay').textContent = `TIME: ${formatTime(Date.now() - gameStart)}`;
+            let val = parseFloat(gravitySlider.value);
+            document.getElementById('gravityDisplay').textContent = `${val.toFixed(3)}G`;
 
-            let centerTarget = activePlanetData.gravity;
-            let dynamicMargin = centerTarget * 0.02;
-            let lowerBound = centerTarget - dynamicMargin;
-            let upperBound = centerTarget + dynamicMargin;
+            let target = activePlanet.gravity;
+            let margin = target * 0.03; // Toleranzfenster
+            let match = (val >= target - margin && val <= target + margin);
+            let dev = val - target;
 
-            let insideWindow = (currentSliderVal >= lowerBound && currentSliderVal <= upperBound);
-            let deviation = currentSliderVal - centerTarget;
+            accuracies.push(1 - Math.min(1, Math.abs(dev)/3.0));
+            document.getElementById('deltaDisplay').textContent = `${dev>=0?'+':''}${dev.toFixed(4)} Δ`;
 
-            let frameAccuracyScore = 1 - Math.min(1, Math.abs(deviation) / 3.5);
-            recordedAccuracyArray.push(frameAccuracyScore);
+            drawNormalScene(dev);
 
-            deltaDisplay.textContent = `${deviation >= 0 ? '+' : ''}${deviation.toFixed(4)} Δ`;
-
-            if (insideWindow) {
-                if (!isLockActive) {
-                    isLockActive = true;
-                    lockTimestamp = Date.now();
-                    greenStrobeIntensity = 25;
-                    spawnQuantumStrobeSplashes();
-                    audioRack.playLockAcquired();
+            if (match) {
+                if (!isLocked) {
+                    isLocked = true; lockStart = Date.now();
+                    audioRack.lock();
                     gravitySlider.classList.add('calibrated-slider');
-                    timerContainer.classList.remove('hidden');
+                    document.getElementById('timerContainer').classList.remove('hidden');
                 }
+                ticksInLock++;
+                let dur = Date.now() - lockStart;
+                document.getElementById('timerBar').style.width = `${Math.max(0, 100 - (dur/3500)*100)}%`;
 
-                let lockDuration = Date.now() - lockTimestamp;
-                let percentLeft = Math.max(0, 100 - (lockDuration / 4000) * 100);
-                timerBar.style.width = `${percentLeft}%`;
+                statusAlert.className = "self-center cyber-panel cyber-panel-success px-10 py-6 rounded-2xl text-center max-w-md";
+                statusTitle.textContent = "✔ SCHWUNGGEWICHT GELOCKT";
+                statusTitle.className = "orbitron text-xl font-black text-green-400";
+                statusDesc.textContent = `Wert stabil! Halte das Kontrollfeld ruhig, um die Erfassung abzuschließen.`;
+                document.getElementById('telemetryStatus').textContent = "RESONANZ HARMONISCH // FIXIERE MATRIX";
+                document.getElementById('telemetryStatus').className = "text-green-400 font-bold";
 
-                statusAlert.className = "self-center cyber-panel cyber-panel-success px-12 py-8 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-xl";
-                statusTitle.textContent = "✔ RES-FIELD LOCKED";
-                statusTitle.className = "orbitron text-2xl font-black text-green-400 drop-shadow-[0_0_15px_#22c55e]";
-                statusDesc.textContent = `Feldstabilisierung aktiv für Sektor ${activePlanetData.name}. Halte die Intensität für 4 Sekunden aufrecht.`;
-                telemetryStatus.textContent = "SYNCHRONIZATION OK // INERTIAL MATRIX LOCK";
-                telemetryStatus.className = "text-green-400 font-bold tracking-widest";
-
-                if (lockDuration >= 4000) {
+                if (dur >= 3500) {
                     activeTourIndex++;
-                    buildTargetSector(activeTourIndex);
-                    return requestAnimationFrame(executeMainEngineTick);
+                    prepareSector(activeTourIndex);
+                    requestAnimationFrame(mainLoop);
+                    return;
                 }
-            } 
-            else {
-                if (isLockActive) {
-                    isLockActive = false;
-                    lockTimestamp = null;
-                    gravitySlider.classList.remove('calibrated-slider');
-                    timerContainer.classList.add('hidden');
-                }
+            } else {
+                if (isLocked) { isLocked = false; lockStart = null; gravitySlider.className = 'w-full cursor-pointer'; document.getElementById('timerContainer').classList.add('hidden'); }
+                
+                if (ticksInLock % 25 === 0 && Math.abs(dev) > 0.05) audioRack.pulse(dev > 0);
+                if (ticksInLock % 8 === 0) audioRack.chirp(val);
+                ticksInLock++;
 
-                soundThrottler++;
-                if (Math.abs(deviation) > 0.04 && soundThrottler % 20 === 0) {
-                    audioRack.playCriticalPulse(deviation > 0);
-                }
-                if (soundThrottler % 8 === 0) {
-                    audioRack.playDeformationNoise(deviation);
-                }
-
-                if (deviation < -0.02) {
-                    statusAlert.className = "self-center cyber-panel cyber-panel-error-low px-12 py-8 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-xl";
-                    statusTitle.textContent = "⚠️ VACUUM DRIFT CRITICAL";
-                    statusTitle.className = "orbitron text-xl font-black text-yellow-400 animate-pulse";
-                    statusDesc.textContent = "Gravitationskraft zu gering! Strukturelle Module trennen sich von Bodenverankerungen. Massenverlust droht.";
-                    telemetryStatus.textContent = "ATMOSPHERIC SHIFT: VACUUM";
-                    telemetryStatus.className = "text-yellow-400 font-bold";
-                } 
-                else if (deviation > 0.02) {
-                    statusAlert.className = "self-center cyber-panel cyber-panel-error-high px-12 py-8 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-xl";
-                    statusTitle.textContent = "⚠️ CRUSH PRESSURE EXTREME";
-                    statusTitle.className = "orbitron text-xl font-black text-red-500";
-                    statusDesc.textContent = "Kritischer Hyper-Druck! Sämtliche architektonische Konstrukte implodieren. Organische Verformung detektiert.";
-                    telemetryStatus.textContent = "CRUSH MATRIX: SINGULARITY RISK";
-                    telemetryStatus.className = "text-red-500 font-bold";
-                } 
-                else {
-                    statusAlert.className = "self-center cyber-panel px-12 py-8 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-xl border-cyan-500/30";
-                    statusTitle.textContent = "ALIGNMENT MODE";
-                    statusTitle.className = "orbitron text-xl font-black text-cyan-400";
-                    statusDesc.textContent = "Justiere den Kontrollaktivator, um das erforderliche Gravitationsäquivalent des Sektors einzumessen.";
-                    telemetryStatus.textContent = "SCANNING FOR FREQUENCY RESONANCE...";
-                    telemetryStatus.className = "text-cyan-400 font-mono";
+                if (dev < -0.02) {
+                    statusAlert.className = "self-center cyber-panel cyber-panel-error-low px-10 py-6 rounded-2xl text-center max-w-md";
+                    statusTitle.textContent = "⚠️ SCHWERELOSER DRIFT";
+                    statusTitle.className = "orbitron text-lg font-black text-yellow-400 animate-pulse";
+                    statusDesc.textContent = "Zu wenig Gravitation! Die Atmosphäre dehnt sich aus, Objekte schweben unkontrolliert nach oben.";
+                    document.getElementById('telemetryStatus').textContent = "WARNUNG: STRATOSPHÄREN-ABDRIFT";
+                    document.getElementById('telemetryStatus').className = "text-yellow-400 font-bold";
+                } else if (dev > 0.02) {
+                    statusAlert.className = "self-center cyber-panel cyber-panel-error-high px-10 py-6 rounded-2xl text-center max-w-md";
+                    statusTitle.textContent = "⚠️ IMPLOSIONS-GEFAHR";
+                    statusTitle.className = "orbitron text-lg font-black text-red-500";
+                    statusDesc.textContent = "Zu viel Druck! Gebäude stauchen sich und die Biomasse wird extrem komprimiert. Erhöhe den Auftrieb!";
+                    document.getElementById('telemetryStatus').textContent = "WARNUNG: GRAVITATIVER CRUSH";
+                    document.getElementById('telemetryStatus').className = "text-red-500 font-bold";
+                } else {
+                    statusAlert.className = "self-center cyber-panel px-10 py-6 rounded-2xl text-center max-w-md border-cyan-500/30";
+                    statusTitle.textContent = "VEKTOR SENSORIK";
+                    statusTitle.className = "orbitron text-lg font-black text-cyan-400";
+                    statusDesc.textContent = "Bewege den Hebel unten vorsichtig. Achte darauf, wie sich Gebäude und Bewohner verhalten!";
+                    document.getElementById('telemetryStatus').textContent = "SUCHE NACH SCHWERKRAFTS-SYNC...";
+                    document.getElementById('telemetryStatus').className = "text-cyan-400 font-mono";
                 }
             }
 
-            renderCoreGridScene(deviation);
+            // Update & Draw Simulation Entities
+            entities.forEach(e => { e.update(dev); e.draw(activePlanet.theme); });
 
-            simulationEntities.forEach(ent => {
-                ent.update(deviation, isLockActive);
-                ent.draw();
+            // Debris Particles
+            debris = debris.filter(p => p.alpha > 0);
+            debris.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.alpha -= p.decay;
+                ctx.save(); ctx.globalAlpha = Math.max(0, p.alpha); ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, 3, 3); ctx.restore();
             });
 
-            environmentalParticlesPool = environmentalParticlesPool.filter(p => p.alpha > 0);
-            environmentalParticlesPool.forEach(p => { p.update(); p.draw(); });
-
-            if (greenStrobeIntensity > 0) {
-                ctx.fillStyle = `rgba(34, 197, 94, ${greenStrobeIntensity / 40})`;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                greenStrobeIntensity--;
-            }
-
-            requestAnimationFrame(executeMainEngineTick);
+            requestAnimationFrame(mainLoop);
         }
 
         // ============================================================================
-        // 8. SUBSYSTEM RUNTIME INITIALIZER
+        // RUNTIME INITIALIZER
         // ============================================================================
         const canvas = document.getElementById('worldCanvas');
         const ctx = canvas.getContext('2d');
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', () => { resize(); if(engineRunning && !zoomPhaseActive) populateSektor(); });
+
+        gravitySlider.addEventListener('input', (e) => { audioRack.chirp(parseFloat(e.target.value)); });
         
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            if(simulationEntities.length === 0 && runningEngine) populateSimCity();
-        });
-
-        gravitySlider.addEventListener('input', (e) => {
-            audioRack.playSliderChirp(parseFloat(e.target.value));
-        });
-
-        restartBtn.addEventListener('click', () => {
-            endScoreScreen.classList.add('hidden');
-            endScoreScreen.classList.remove('opacity-100');
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            document.getElementById('endScoreScreen').classList.add('hidden');
             document.getElementById('gameUI').classList.remove('pointer-events-none');
-            bootFullQuantumEngineTour();
+            bootEngine();
         });
 
-        function bootFullQuantumEngineTour() {
-            resizeCanvas();
-            runningEngine = true;
+        function bootEngine() {
+            resize();
+            engineRunning = true;
             activeTourIndex = 0;
-            recordedAccuracyArray = [];
-            gameStartTime = Date.now();
-            generateCosmosBackground();
-            shuffleTourPlanets();
-            buildTargetSector(activeTourIndex);
-            executeMainEngineTick();
+            accuracies = [];
+            gameStart = Date.now();
+            initStars();
+            
+            // Zufällige Reihenfolge der Planeten für die Tour festlegen
+            let temp = [...corePlanets]; tourSequence = [];
+            while(temp.length > 0) tourSequence.push(temp.splice(Math.floor(Math.random()*temp.length), 1)[0]);
+
+            prepareSector(activeTourIndex);
+            mainLoop();
         }
 
-        // IGNITE SYSTEM ENGINE
-        bootFullQuantumEngineTour();
+        // ZÜNDUNG
+        bootEngine();
     </script>
 </body>
 </html>
