@@ -61,7 +61,7 @@
             display: block;
             position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(15, 15, 15, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background: linear-gradient(rgba(15, 15, 15, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.04));
             z-index: 999;
             background-size: 100% 6px, 6px 100%;
             pointer-events: none;
@@ -201,7 +201,6 @@
             
             playDeformationNoise(deviation) {
                 this.init(); if (!this.ctx || Math.abs(deviation) < 0.05) return;
-                // Generiert metallisches Ächzen / Kreischen prozedural
                 let baseFreq = deviation > 0 ? 120 + Math.random()*80 : 350 + Math.random()*150;
                 this.triggerNote(baseFreq, deviation > 0 ? 'sawtooth' : 'sine', 0.05, 0.02);
             }
@@ -241,7 +240,6 @@
             
             qctx.fillStyle = '#000000'; qctx.fillRect(0,0,side,side);
             
-            // Render Security Anchor Cubes
             qctx.fillStyle = '#ffffff';
             const drawAnchor = (cx, cy) => {
                 qctx.fillStyle = '#ffffff'; qctx.fillRect(cx, cy, 24, 24);
@@ -250,7 +248,6 @@
             };
             drawAnchor(4, 4); drawAnchor(side - 28, 4); drawAnchor(4, side - 28);
             
-            // Random Pattern Matrix filling
             let iterator = 0;
             for (let y = 4; y < side - 4; y += 4) {
                 for (let x = 4; x < side - 4; x += 4) {
@@ -302,7 +299,6 @@
         let activePlanetData = null;
         
         let simulationEntities = [];
-        let particlesPool = [];
         let cosmicStars = [];
 
         let isLockActive = false;
@@ -343,13 +339,13 @@
         class MegacityBuilding {
             constructor(x) {
                 this.x = x;
-                this.style = Math.floor(Math.random() * 3); // 0: Block-Wohnkomplex, 1: Spire-Spitz-Turm, 2: Reaktor
+                this.style = Math.floor(Math.random() * 3);
                 this.baseW = 90 + Math.random() * 50;
                 this.baseH = 200 + Math.random() * 250;
                 this.w = this.baseW;
                 this.h = this.baseH;
                 
-                this.hue = Math.floor(Math.random() * 30) + 200; // Cyber-Cyan/Blau
+                this.hue = Math.floor(Math.random() * 30) + 200;
                 this.floatAngle = 0;
                 this.floatRotSpeed = (Math.random() - 0.5) * 0.015;
                 this.vy = 0;
@@ -370,7 +366,7 @@
                     } else { this.y = targetY; }
                 } 
                 else {
-                    if (deviation < -0.02) { // TOO LOW -> Schweben und Abreißen
+                    if (deviation < -0.02) {
                         let power = Math.abs(deviation);
                         this.vy -= (Math.random() * 0.03 + 0.01) * power;
                         this.vy *= 0.95;
@@ -378,14 +374,13 @@
                         this.floatAngle += this.floatRotSpeed * power;
                         if (this.y < -500) this.y = canvas.height + 100;
                     } 
-                    else if (deviation > 0.02) { // TOO HIGH -> Brutales Squeezed Deformation Model
+                    else if (deviation > 0.02) {
                         let crushAmt = Math.min(0.78, deviation * 0.25);
                         this.h = this.baseH * (1 - crushAmt);
                         this.w = this.baseW * (1 + crushAmt * 0.5);
                         this.y = groundY - this.h;
                         this.shakeX = (Math.random() - 0.5) * (deviation * 8);
 
-                        // Wenn extrem zerquetscht, zerspringen Fenster
                         if (deviation > 0.6 && Math.random() > 0.85) {
                             createParticle(this.x + Math.random()*this.w, this.y + Math.random()*this.h, '#00ffff', (Math.random()-0.5)*8, -Math.random()*6);
                         }
@@ -407,11 +402,10 @@
                 ctx.shadowBlur = isLockActive ? 4 : 16;
                 ctx.shadowColor = `hsla(${this.hue}, 100%, 55%, 0.4)`;
 
-                if (this.style === 0) { // Block-Gebäude
+                if (this.style === 0) {
                     ctx.fillRect(hX, hY, this.w, this.h);
                     ctx.strokeRect(hX, hY, this.w, this.h);
                     
-                    // Fenster-Matrizen
                     ctx.fillStyle = `hsla(${this.hue}, 100%, 75%, 0.35)`;
                     let rStepX = this.w / 5;
                     let rStepY = Math.max(12, this.h / 15);
@@ -421,7 +415,7 @@
                         }
                     }
                 } 
-                else if (this.style === 1) { // Spire-Spitzturm
+                else if (this.style === 1) {
                     ctx.beginPath();
                     ctx.moveTo(hX, this.h/2);
                     ctx.lineTo(0, hY);
@@ -429,25 +423,23 @@
                     ctx.closePath();
                     ctx.fill(); ctx.stroke();
 
-                    // Leuchtender Energiekern im Zentrum
                     ctx.fillStyle = '#ff00ff';
                     ctx.fillRect(-3, hY + 40, 6, this.h - 50);
                 } 
-                else { // Reaktor-Zylinder
+                else {
                     ctx.fillRect(hX + 10, hY, this.w - 20, this.h);
                     ctx.strokeRect(hX + 10, hY, this.w - 20, this.h);
-                    // Kühlschlitze
                     ctx.strokeStyle = '#ffaa00';
                     ctx.lineWidth = 1.5;
                     for(let i = hY + 20; i < hY + this.h - 20; i += 16) {
-                        ctx.beginPath(); ctx.moveTo(hX + 20, i); ctx.lineTo(hX + this.w - 20, i); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(xPos => hX + 20, i); ctx.lineTo(hX + this.w - 20, i); ctx.stroke();
                     }
                 }
                 ctx.restore();
             }
         }
 
-        // --- INVERSE KINEMATIK ALIEN ENTIÄTEN (SKELETT-MODELL) ---
+        // --- INVERSE KINEMATIK ALIEN CITIZENS ---
         class LivingAlienCitizen {
             constructor(x) {
                 this.x = x;
@@ -459,7 +451,7 @@
                 this.vy = 0;
                 this.floatAngle = 0;
                 this.floatRotSpeed = (Math.random() - 0.5) * 0.06;
-                this.hue = Math.floor(Math.random() * 40) + 120; // Neo-Alien Grün
+                this.hue = Math.floor(Math.random() * 40) + 120;
                 this.limbCycle = Math.random() * 100;
             }
 
@@ -479,24 +471,24 @@
                     } else { this.y = targetY; }
                 } 
                 else {
-                    if (deviation < -0.02) { // FLOATING -> Arme/Beine rudern chaotisch
+                    if (deviation < -0.02) {
                         let power = Math.abs(deviation);
                         this.vy -= (Math.random() * 0.07 + 0.03) * power;
                         this.vy *= 0.94;
                         this.y += this.vy;
                         this.x += this.vx * 0.3;
                         this.floatAngle += this.floatRotSpeed * power;
-                        this.limbCycle += 0.6; // Schnelles Strampeln
+                        this.limbCycle += 0.6;
 
                         if (this.y < -100) this.y = canvas.height + 40;
                     } 
-                    else if (deviation > 0.02) { // SQUEEZED -> Komplett plattgedrückte Kriechstruktur
+                    else if (deviation > 0.02) {
                         let crushAmt = Math.min(0.8, deviation * 0.38);
                         this.h = this.baseH * (1 - crushAmt);
                         this.w = this.baseW * (1 + crushAmt * 0.8);
                         this.y = groundY - this.h;
                         this.floatAngle = 0;
-                        this.x += this.vx * (1 - crushAmt * 0.9); // Stark verlangsamt
+                        this.x += this.vx * (1 - crushAmt * 0.95);
                         this.limbCycle += 0.05;
                     }
                 }
@@ -514,27 +506,21 @@
                 ctx.strokeStyle = `hsla(${this.hue}, 100%, 50%, 0.95)`;
                 ctx.fillStyle = `hsla(${this.hue}, 90%, 10%, 0.8)`;
 
-                // Torso
                 ctx.fillRect(-this.w/2, -this.h/4, this.w, this.h/2);
                 ctx.strokeRect(-this.w/2, -this.h/4, this.w, this.h/2);
 
-                // Kopf / Visor
                 ctx.beginPath();
                 ctx.arc(0, -this.h/3, this.w/3, 0, Math.PI*2);
                 ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#ff0055'; // Zyklopen-Auge leuchtet extra wild bei Druck
+                ctx.fillStyle = '#ff0055';
                 ctx.fillRect(-this.w/6, -this.h/3 - 2, this.w/3, 4);
 
-                // Extremitäten-Animation (Gliedmaßen-Skelett)
                 let limbOffset = Math.sin(this.limbCycle) * 12;
                 ctx.strokeStyle = `hsla(${this.hue}, 100%, 50%, 1)`;
 
-                // Beine / Arme zeichnen
                 ctx.beginPath();
-                // Linkes Bein, Rechtes Bein
                 ctx.moveTo(-this.w/4, this.h/4); ctx.lineTo(-this.w/3 + limbOffset, this.h/2 + 6);
                 ctx.moveTo(this.w/4, this.h/4);  ctx.lineTo(this.w/3 - limbOffset, this.h/2 + 6);
-                // Linker Arm, Rechter Arm
                 ctx.moveTo(-this.w/2, -this.h/8); ctx.lineTo(-this.w/2 - 8, limbOffset);
                 ctx.moveTo(this.w/2, -this.h/8);  ctx.lineTo(this.w/2 + 8, -limbOffset);
                 ctx.stroke();
@@ -543,7 +529,7 @@
             }
         }
 
-        // --- CYBER-TRUCKS & STRASSENFAHRZEUGE ---
+        // --- CYBER-TRUCKS ---
         class GroundCyberTruck {
             constructor() {
                 this.baseW = 65; this.baseH = 24;
@@ -554,7 +540,7 @@
                 this.vy = 0;
                 this.floatAngle = 0;
                 this.floatRotSpeed = (Math.random() - 0.5) * 0.09;
-                this.hue = Math.floor(Math.random() * 30) + 10; // Cyberpunk Orange
+                this.hue = Math.floor(Math.random() * 30) + 10;
                 this.wheelSpin = 0;
             }
 
@@ -574,7 +560,7 @@
                     } else { this.y = targetY; }
                 } 
                 else {
-                    if (deviation < -0.02) { // FLOATING -> Schwebt kopfüber davongeblasen
+                    if (deviation < -0.02) {
                         let power = Math.abs(deviation);
                         this.vy -= (Math.random() * 0.09 + 0.04) * power;
                         this.vy *= 0.94;
@@ -583,7 +569,7 @@
                         this.floatAngle += this.floatRotSpeed * power;
                         if (this.y < -150) this.y = canvas.height + 60;
                     } 
-                    else if (deviation > 0.02) { // SQUEEZED -> Chassis bricht zusammen, schleift am Asphalt
+                    else if (deviation > 0.02) {
                         let crushAmt = Math.min(0.85, deviation * 0.45);
                         this.h = this.baseH * (1 - crushAmt);
                         this.w = this.baseW * (1 + crushAmt * 0.6);
@@ -591,7 +577,6 @@
                         this.floatAngle = 0;
                         this.x += this.vx * (1 - crushAmt * 0.95);
                         
-                        // Erzeugt heftige Reibungs-Funken auf dem Boden
                         if (Math.random() > 0.6) {
                             createParticle(this.x + this.w/2, groundY, '#ffaa00', -this.vx * 0.5, -(Math.random()*4));
                         }
@@ -611,7 +596,6 @@
                 ctx.strokeStyle = `hsla(${this.hue}, 100%, 50%, 0.95)`;
                 ctx.fillStyle = `hsla(${this.hue}, 90%, 10%, 0.85)`;
 
-                // Polygonaler Low-Poly Cyber-Truck Body
                 ctx.beginPath();
                 ctx.moveTo(-this.w/2, this.h/2);
                 ctx.lineTo(-this.w/2, -this.h/4);
@@ -622,7 +606,6 @@
                 ctx.closePath();
                 ctx.fill(); ctx.stroke();
 
-                // Rotierende Vektor-Räder (Nur sichtbar wenn funktional am Boden)
                 ctx.fillStyle = '#00f0ff';
                 ctx.save();
                 ctx.translate(-this.w/4, this.h/2);
@@ -640,7 +623,7 @@
             }
         }
 
-        // --- PROZEDURALE TRÜMMER-PARTIKEL ---
+        // --- TRÜMMER-PARTIKEL ---
         class VectorDebrisParticle {
             constructor(x, y, color, vx, vy) {
                 this.x = x; this.y = y;
@@ -676,15 +659,12 @@
             simulationEntities = [];
             environmentalParticlesPool = [];
             
-            // Gebäude Ketten-Berechnung
             for (let x = 30; x < canvas.width - 120; x += 160) {
                 simulationEntities.push(new MegacityBuilding(x + (Math.random() * 30 - 15)));
             }
-            // Aliens injizieren
             for(let i=0; i<20; i++) {
                 simulationEntities.push(new LivingAlienCitizen(Math.random() * canvas.width));
             }
-            // Trucks verteilen
             for(let i=0; i<6; i++) {
                 simulationEntities.push(new GroundCyberTruck());
             }
@@ -709,12 +689,10 @@
             isLockActive = false;
             lockTimestamp = null;
 
-            // Manipuliere Slider-Startpunkt stark asynchron
             gravitySlider.value = (Math.random() * 3.5 + 0.15).toFixed(3);
             gravitySlider.classList.remove('calibrated-slider');
             timerContainer.classList.add('hidden');
 
-            // Setze HUD Datenfelder um
             progressionCounter.textContent = `SEKTOR MAP: ${activeTourIndex + 1} / ${randomTourSequence.length}`;
             planetNameDisplay.textContent = activePlanetData.name.toUpperCase();
             planetTypeReadout.textContent = `SYS_INFO: ${activePlanetData.info}`;
@@ -758,7 +736,6 @@
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Sternenfeld Parallax Multi-Threading Simulation
             ctx.fillStyle = '#ffffff';
             cosmicStars.forEach(s => {
                 let dynamicDriftX = Math.sin(Date.now() * 0.0008) * (deviation * 14) * s.parallaxFactor;
@@ -767,7 +744,6 @@
             });
             ctx.globalAlpha = 1.0;
 
-            // Himmelskörper / Massen-Zentrum zeichnen
             ctx.save();
             let pX = canvas.width * 0.76;
             let pY = canvas.height * 0.3;
@@ -791,13 +767,11 @@
             }
             ctx.restore();
 
-            // Perimeter Trennungslinie (Bodenstruktur)
             let groundLevelY = canvas.height - 140;
             ctx.strokeStyle = isLockActive ? 'rgba(34, 197, 94, 0.6)' : 'rgba(0, 240, 255, 0.3)';
             ctx.lineWidth = 4;
             ctx.beginPath(); ctx.moveTo(0, groundLevelY); ctx.lineTo(canvas.width, groundLevelY); ctx.stroke();
 
-            // Fluchtlinien-Gitter Matrizen-Renders
             ctx.lineWidth = 1;
             ctx.strokeStyle = isLockActive ? 'rgba(34, 197, 94, 0.16)' : 'rgba(0, 240, 255, 0.07)';
             for (let xPos = 0; xPos < canvas.width; xPos += 70) {
@@ -818,18 +792,16 @@
             gravityDisplay.textContent = `${currentSliderVal.toFixed(3)}G`;
 
             let centerTarget = activePlanetData.gravity;
-            let dynamicMargin = centerTarget * 0.02; // ±2% mathematische Schranke
+            let dynamicMargin = centerTarget * 0.02;
             let lowerBound = centerTarget - dynamicMargin;
             let upperBound = centerTarget + dynamicMargin;
 
             let insideWindow = (currentSliderVal >= lowerBound && currentSliderVal <= upperBound);
             let deviation = currentSliderVal - centerTarget;
 
-            // Genauigkeitsberechnung loggen
             let frameAccuracyScore = 1 - Math.min(1, Math.abs(deviation) / 3.5);
             recordedAccuracyArray.push(frameAccuracyScore);
 
-            // Delta-HUD füllen
             deltaDisplay.textContent = `${deviation >= 0 ? '+' : ''}${deviation.toFixed(4)} Δ`;
 
             if (insideWindow) {
@@ -861,7 +833,6 @@
                 }
             } 
             else {
-                // Bei Feldverlust Reset der Haltezeit
                 if (isLockActive) {
                     isLockActive = false;
                     lockTimestamp = null;
@@ -877,7 +848,7 @@
                     audioRack.playDeformationNoise(deviation);
                 }
 
-                if (deviation < -0.02) { // TOO LOW (FLOATING)
+                if (deviation < -0.02) {
                     statusAlert.className = "self-center cyber-panel cyber-panel-error-low px-12 py-8 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-xl";
                     statusTitle.textContent = "⚠️ VACUUM DRIFT CRITICAL";
                     statusTitle.className = "orbitron text-xl font-black text-yellow-400 animate-pulse";
@@ -885,7 +856,7 @@
                     telemetryStatus.textContent = "ATMOSPHERIC SHIFT: VACUUM";
                     telemetryStatus.className = "text-yellow-400 font-bold";
                 } 
-                else if (deviation > 0.02) { // TOO HIGH (SQUEEZED)
+                else if (deviation > 0.02) {
                     statusAlert.className = "self-center cyber-panel cyber-panel-error-high px-12 py-8 rounded-2xl text-center transition-all duration-300 transform scale-100 opacity-100 max-w-xl";
                     statusTitle.textContent = "⚠️ CRUSH PRESSURE EXTREME";
                     statusTitle.className = "orbitron text-xl font-black text-red-500";
@@ -905,17 +876,14 @@
 
             renderCoreGridScene(deviation);
 
-            // Objekte-Pipeline updaten & rendern
             simulationEntities.forEach(ent => {
                 ent.update(deviation, isLockActive);
                 ent.draw();
             });
 
-            // Partikel-Routinen bereinigen & rendern
             environmentalParticlesPool = environmentalParticlesPool.filter(p => p.alpha > 0);
             environmentalParticlesPool.forEach(p => { p.update(); p.draw(); });
 
-            // Grüner Strobe-Blitz-Layer
             if (greenStrobeIntensity > 0) {
                 ctx.fillStyle = `rgba(34, 197, 94, ${greenStrobeIntensity / 40})`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -928,6 +896,19 @@
         // ============================================================================
         // 8. SUBSYSTEM RUNTIME INITIALIZER
         // ============================================================================
+        const canvas = document.getElementById('worldCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            if(simulationEntities.length === 0 && runningEngine) populateSimCity();
+        });
+
         gravitySlider.addEventListener('input', (e) => {
             audioRack.playSliderChirp(parseFloat(e.target.value));
         });
@@ -940,6 +921,7 @@
         });
 
         function bootFullQuantumEngineTour() {
+            resizeCanvas();
             runningEngine = true;
             activeTourIndex = 0;
             recordedAccuracyArray = [];
